@@ -114,7 +114,7 @@ function addContact()
 	let lastNameContact = document.getElementById("contactText").value;
 	let email = document.getElementById("contactText").value;
 	let phone = document.getElementById("contactText").value;
-	//add date created later
+	let date = new Date(); 
 	document.getElementById("contactAddResult").innerHTML = "";
 
 	let tmp = {contact:newContact,userId,userId};
@@ -187,6 +187,7 @@ function searchColor()
 	}
 	
 }
+
 
 
 
