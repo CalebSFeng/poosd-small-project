@@ -67,7 +67,19 @@ body
 {
 	font-size: 30px;
 }
-#contactText
+#firstNameContact
+{
+	font-size: 30px;
+}
+#lastNameContact
+{
+	font-size: 30px;
+}
+#email
+{
+	font-size: 30px;
+}
+#phone
 {
 	font-size: 30px;
 }
@@ -139,3 +151,4 @@ select{
     color: #95060a;
 
 }
+
