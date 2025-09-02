@@ -67,7 +67,7 @@ body
 {
 	font-size: 30px;
 }
-#colorText
+#contactText
 {
 	font-size: 30px;
 }
@@ -123,11 +123,11 @@ select{
     font-family: 'Ubuntu', sans-serif;
 }
 
-#colorSearchResult{
+#contactSearchResult{
     display: none;
 }
 
-#colorAddResult{
+#contactAddResult{
     display: inline-block;
     font-size: 0.8em;
     width: 90%;
@@ -137,4 +137,5 @@ select{
     margin-bottom: 1%;
     font-family: 'Ubuntu', sans-serif;
     color: #95060a;
+
 }
