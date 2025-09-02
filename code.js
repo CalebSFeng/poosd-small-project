@@ -110,7 +110,11 @@ function doLogout()
 
 function addContact()
 {
-	let newContact = document.getElementById("contactText").value;
+	let firstNameContact = document.getElementById("contactText").value;
+	let lastNameContact = document.getElementById("contactText").value;
+	let email = document.getElementById("contactText").value;
+	let phone = document.getElementById("contactText").value;
+	//add date created later
 	document.getElementById("contactAddResult").innerHTML = "";
 
 	let tmp = {contact:newContact,userId,userId};
@@ -183,5 +187,6 @@ function searchColor()
 	}
 	
 }
+
 
 
