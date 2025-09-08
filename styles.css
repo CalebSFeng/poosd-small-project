@@ -67,11 +67,11 @@ body
 {
 	font-size: 30px;
 }
-#firstNameContactText
+#firstNameText
 {
 	font-size: 30px;
 }
-#lastNameContactText
+#lastNameText
 {
 	font-size: 30px;
 }
@@ -151,5 +151,6 @@ select{
     color: #95060a;
 
 }
+
 
 
