@@ -110,10 +110,10 @@ function doLogout()
 
 function addContact()
 {
-	let firstNameContact = document.getElementById("contactText").value;
-	let lastNameContact = document.getElementById("contactText").value;
-	let newEmail = document.getElementById("contactText").value;
-	let newPhone = document.getElementById("contactText").value;
+	let firstNameContact = document.getElementById("firstNameText").value;
+	let lastNameContact = document.getElementById("lastNameText").value;
+	let newEmail = document.getElementById("emailText").value;
+	let newPhone = document.getElementById("phoneText").value;
 	let newDate = new Date(); 
 	document.getElementById("contactAddResult").innerHTML = "";
 
@@ -192,6 +192,7 @@ function searchColor()
 	}
 	
 }
+
 
 
 
