@@ -112,12 +112,17 @@ function addContact()
 {
 	let firstNameContact = document.getElementById("contactText").value;
 	let lastNameContact = document.getElementById("contactText").value;
-	let email = document.getElementById("contactText").value;
-	let phone = document.getElementById("contactText").value;
-	let date = new Date(); 
+	let newEmail = document.getElementById("contactText").value;
+	let newPhone = document.getElementById("contactText").value;
+	let newDate = new Date(); 
 	document.getElementById("contactAddResult").innerHTML = "";
 
-	let tmp = {contact:newContact,userId,userId};
+	let tmp = {firstNameContact:newFirstNameContact,
+			   lastNameContact:newlastNameContact,
+			   email: newEmail,
+			   phone : newPHone,
+			   date: newDate,
+			   userId, userId};
 	let jsonPayload = JSON.stringify( tmp );
 
 	let url = urlBase + '/AddContact.' + extension;
@@ -187,6 +192,7 @@ function searchColor()
 	}
 	
 }
+
 
 
 
