@@ -55,8 +55,28 @@ function doLogin()
 	{
 		document.getElementById("loginResult").innerHTML = err.message;
 	}
-
+	
 }
+
+// Password visibility toggle setup
+function setupPasswordToggle() {
+    const loginPassword = document.getElementById('loginPassword');
+    const passwordToggle = document.getElementById('passwordToggle');
+    if (!loginPassword || !passwordToggle) return;
+
+    passwordToggle.addEventListener('click', () => {
+        const type = loginPassword.type === 'password' ? 'text' : 'password';
+        loginPassword.type = type;
+        passwordToggle.classList.toggle('toggle-active', type === 'text');
+
+        if (typeof triggerGentleRipple === 'function') {
+            triggerGentleRipple(passwordToggle);
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', setupPasswordToggle);
+
 
 function saveCookie()
 {
