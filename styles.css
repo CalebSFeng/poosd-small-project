@@ -160,6 +160,49 @@ body {
   z-index: 2;
 }
 
+/* Comfort Signup */
+.comfort-signup {
+    text-align: center;
+    font-size: 14px;
+    color: rgba(139, 102, 85, 0.7);
+}
+
+.signup-text {
+    margin-right: 6px;
+}
+
+.signup-link {
+    font-weight: 500;
+}
+
+.comfort-link {
+    color: #c19a82;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.comfort-link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: #c19a82;
+    transition: width 0.3s ease;
+}
+
+.comfort-link:hover::after {
+    width: 100%;
+}
+
+.comfort-link:hover {
+    color: #8b6655;
+}
+
 .gentle-glow {
   position: absolute;
   inset: 0;

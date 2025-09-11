@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<script src="code.js" defer></script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -39,15 +40,15 @@
             <form class="comfort-form" id="loginForm" novalidate>
                 <div class="soft-field">
                     <div class="field-container">
-                        <input type="email" id="email" name="email" required autocomplete="email" placeholder="Enter your email">
+                        <input type="text" id="loginName" name="username" required autocomplete="username" placeholder="Username">
                         <div class="field-accent"></div>
                     </div>
-                    <span class="gentle-error" id="emailError"></span>
+                    <span class="gentle-error" id="usernameError"></span>
                 </div>
 
                 <div class="soft-field">
                     <div class="field-container">
-                        <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="Password">
+                        <input type="text" id="loginPassword" name="password" required autocomplete="current-password" placeholder="Password">
                         <button type="button" class="gentle-toggle" id="passwordToggle" aria-label="Toggle password visibility">
                             <div class="toggle-icon">
                                 <svg class="eye-open" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -64,7 +65,8 @@
                     <span class="gentle-error" id="passwordError"></span>
                 </div>
 
-                
+
+
 
                 <button type="submit" class="comfort-button">
                     <div class="button-background"></div>
@@ -76,6 +78,11 @@
                     </div>
                     <div class="button-glow"></div>
                 </button>
+
+                <div class="comfort-signup">
+                    <span class="signup-text">Don't have an account?</span>
+                    <a href="signup.html" class="comfort-link signup-link">Sign up</a>
+                </div>
             </form>
 
         </div>
