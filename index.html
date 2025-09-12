@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-<script src="code.js" defer></script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>COP 4331 LAMP Stack Demo</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="code.js" defer></script>
 </head>
 <body>
     <div class="soft-background">
@@ -37,7 +37,7 @@
                 <p class="gentle-subtitle">Please Log In</p>
             </div>
             
-            <form class="comfort-form" id="loginForm" novalidate>
+            <form class="comfort-form" id="loginForm" method="post" action="#" novalidate>
                 <div class="soft-field">
                     <div class="field-container">
                         <input type="text" id="loginName" name="username" required autocomplete="username" placeholder="Username">
@@ -48,7 +48,7 @@
 
                 <div class="soft-field">
                     <div class="field-container">
-                        <input type="text" id="loginPassword" name="password" required autocomplete="current-password" placeholder="Password">
+                        <input type="password" id="loginPassword" name="password" required autocomplete="current-password" placeholder="Password">
                         <button type="button" class="gentle-toggle" id="passwordToggle" aria-label="Toggle password visibility">
                             <div class="toggle-icon">
                                 <svg class="eye-open" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -62,7 +62,7 @@
                         </button>
                         <div class="field-accent"></div>
                     </div>
-                    <span class="gentle-error" id="passwordError"></span>
+                    <span class="gentle-error" id="loginResult"></span>
                 </div>
 
 
