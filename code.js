@@ -1,172 +1,160 @@
-const urlBase = 'http://evalopez.xyz/LAMPAPI';
+const urlBase = 'http://poosdgroup1.xyz/';
 const extension = 'php';
 
 let userId = 0;
-let firstName = "";
-let lastName = "";
+let firstName = '';
+let lastName = '';
 
-function doLogin()
-{
-	userId = 0;
-	firstName = "";
-	lastName = "";
-	
-	let login = document.getElementById("loginName").value;
-	let password = document.getElementById("loginPassword").value;
-//	var hash = md5( password );
-	
-	document.getElementById("loginResult").innerHTML = "";
+function doLogin() {
+  userId = 0; firstName = ''; lastName = '';
 
-	let tmp = {login:login,password:password};
-//	var tmp = {login:login,password:hash};
-	let jsonPayload = JSON.stringify( tmp );
-	
-	let url = urlBase + '/Login.' + extension;
+  const login = document.getElementById('loginName').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const resultEl = document.getElementById('loginResult');
 
-	let xhr = new XMLHttpRequest();
-	xhr.open("POST", url, true);
-	xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
-	try
-	{
-		xhr.onreadystatechange = function() 
-		{
-			if (this.readyState == 4 && this.status == 200) 
-			{
-				let jsonObject = JSON.parse( xhr.responseText );
-				userId = jsonObject.id;
-		
-				if( userId < 1 )
-				{		
-					document.getElementById("loginResult").innerHTML = "User/Password combination incorrect";
-					return;
-				}
-		
-				firstName = jsonObject.firstName;
-				lastName = jsonObject.lastName;
+  if (!login || !password) {
+    if (resultEl) resultEl.textContent = 'Please enter username and password.';
+    return;
+  }
+  if (resultEl) resultEl.textContent = '';
 
-				saveCookie();
-	
-				window.location.href = "color.html";
-			}
-		};
-		xhr.send(jsonPayload);
-	}
-	catch(err)
-	{
-		document.getElementById("loginResult").innerHTML = err.message;
-	}
-	
+  const jsonPayload = JSON.stringify({ login, password });
+  const url = `${urlBase}Login.${extension}`;
+
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', url, true);
+  xhr.setRequestHeader('Content-type', 'application/json; charset=UTF-8');
+  xhr.timeout = 10000; // 10s
+
+  xhr.onreadystatechange = function () {
+    if (this.readyState !== 4) return;
+
+    if (this.status !== 200) {
+      if (resultEl) resultEl.textContent = `HTTP ${this.status}`;
+      return;
+    }
+    try {
+      const jsonObject = JSON.parse(xhr.responseText);
+      userId = jsonObject.id || 0;
+
+      if (userId < 1) {
+        if (resultEl) resultEl.textContent = 'User/Password combination incorrect';
+        return;
+      }
+      firstName = jsonObject.firstName || '';
+      lastName  = jsonObject.lastName  || '';
+
+      saveCookie();
+      window.location.href = 'color.html';
+    } catch (e) {
+      if (resultEl) resultEl.textContent = 'Invalid server response';
+      console.error('Parse error:', e, xhr.responseText);
+    }
+  };
+
+  xhr.onerror = () => { if (resultEl) resultEl.textContent = 'Network error.'; };
+  xhr.ontimeout = () => { if (resultEl) resultEl.textContent = 'Request timed out.'; };
+
+  xhr.send(jsonPayload);
 }
 
-// Password visibility toggle setup
+
+// ---- Password eye ----
 function setupPasswordToggle() {
-    const loginPassword = document.getElementById('loginPassword');
-    const passwordToggle = document.getElementById('passwordToggle');
-    if (!loginPassword || !passwordToggle) return;
+  const loginPassword = document.getElementById('loginPassword');
+  const passwordToggle = document.getElementById('passwordToggle');
+  if (!loginPassword || !passwordToggle) return;
 
-    passwordToggle.addEventListener('click', () => {
-        const type = loginPassword.type === 'password' ? 'text' : 'password';
-        loginPassword.type = type;
-        passwordToggle.classList.toggle('toggle-active', type === 'text');
+  passwordToggle.addEventListener('click', () => {
+    const type = loginPassword.type === 'password' ? 'text' : 'password';
+    loginPassword.type = type;
+    passwordToggle.classList.toggle('toggle-active', type === 'text');
 
-        if (typeof triggerGentleRipple === 'function') {
-            triggerGentleRipple(passwordToggle);
-        }
+    if (typeof triggerGentleRipple === 'function') {
+      triggerGentleRipple(passwordToggle);
+    }
+  });
+}
+
+// ---- Wire up after DOM ready ----
+document.addEventListener('DOMContentLoaded', () => {
+  setupPasswordToggle();
+
+  const form = document.getElementById('loginForm');
+  if (form) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      console.log('Submitting via AJAX');
+      doLogin();
+      return false;
     });
+  } else {
+    console.warn('loginForm not found');
+  }
+});
+
+// ---- Cookie helpers ----
+function saveCookie() {
+  const minutes = 20;
+  const date = new Date();
+  date.setTime(date.getTime() + minutes * 60 * 1000);
+  document.cookie =
+    `firstName=${firstName},lastName=${lastName},userId=${userId};expires=${date.toGMTString()};path=/`;
 }
 
-document.addEventListener('DOMContentLoaded', setupPasswordToggle);
+function readCookie() {
+  userId = -1;
+  const data = document.cookie;
+  const splits = data.split(',');
+  for (let i = 0; i < splits.length; i++) {
+    const [k, v] = splits[i].trim().split('=');
+    if (k === 'firstName') firstName = v;
+    else if (k === 'lastName') lastName = v;
+    else if (k === 'userId') userId = parseInt(v.trim(), 10);
+  }
 
-
-function saveCookie()
-{
-	let minutes = 20;
-	let date = new Date();
-	date.setTime(date.getTime()+(minutes*60*1000));	
-	document.cookie = "firstName=" + firstName + ",lastName=" + lastName + ",userId=" + userId + ";expires=" + date.toGMTString();
+  if (userId < 0) {
+    window.location.href = 'index.html';
+  }
 }
 
-function readCookie()
-{
-	userId = -1;
-	let data = document.cookie;
-	let splits = data.split(",");
-	for(var i = 0; i < splits.length; i++) 
-	{
-		let thisOne = splits[i].trim();
-		let tokens = thisOne.split("=");
-		if( tokens[0] == "firstName" )
-		{
-			firstName = tokens[1];
-		}
-		else if( tokens[0] == "lastName" )
-		{
-			lastName = tokens[1];
-		}
-		else if( tokens[0] == "userId" )
-		{
-			userId = parseInt( tokens[1].trim() );
-		}
-	}
-	
-	if( userId < 0 )
-	{
-		window.location.href = "index.html";
-	}
-	else
-	{
-//		document.getElementById("userName").innerHTML = "Logged in as " + firstName + " " + lastName;
-	}
+function doLogout() {
+  userId = 0;
+  firstName = '';
+  lastName = '';
+  document.cookie = 'firstName=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+  window.location.href = 'index.html';
 }
 
-function doLogout()
-{
-	userId = 0;
-	firstName = "";
-	lastName = "";
-	document.cookie = "firstName= ; expires = Thu, 01 Jan 1970 00:00:00 GMT";
-	window.location.href = "index.html";
+function addContact() {
+  const firstNameContact = document.getElementById("firstNameText").value.trim();
+  const lastNameContact  = document.getElementById("lastNameText").value.trim();
+  const email            = document.getElementById("emailText").value.trim();
+  const phone            = document.getElementById("phoneText").value.trim();
+  const date             = new Date();
+
+  document.getElementById("contactAddResult").textContent = "";
+
+  const jsonPayload = JSON.stringify({
+    firstNameContact, lastNameContact, email, phone, date, userId
+  });
+
+  const url = `${urlBase}AddContact.${extension}`;
+  const xhr = new XMLHttpRequest();
+  xhr.open("POST", url, true);
+  xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+  xhr.onreadystatechange = function () {
+    if (this.readyState === 4) {
+      if (this.status === 200) {
+        document.getElementById("contactAddResult").textContent = "Contact has been added";
+      } else {
+        document.getElementById("contactAddResult").textContent = `HTTP ${this.status}`;
+      }
+    }
+  };
+  xhr.send(jsonPayload);
 }
 
-function addContact()
-{
-	let firstNameContact = document.getElementById("firstNameText").value;
-	let lastNameContact = document.getElementById("lastNameText").value;
-	let newEmail = document.getElementById("emailText").value;
-	let newPhone = document.getElementById("phoneText").value;
-	let newDate = new Date(); 
-	document.getElementById("contactAddResult").innerHTML = "";
-
-	let tmp = {firstNameContact:newFirstNameContact,
-			   lastNameContact:newlastNameContact,
-			   email: newEmail,
-			   phone : newPHone,
-			   date: newDate,
-			   userId, userId};
-	let jsonPayload = JSON.stringify( tmp );
-
-	let url = urlBase + '/AddContact.' + extension;
-	
-	let xhr = new XMLHttpRequest();
-	xhr.open("POST", url, true);
-	xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
-	try
-	{
-		xhr.onreadystatechange = function() 
-		{
-			if (this.readyState == 4 && this.status == 200) 
-			{
-				document.getElementById("contactAddResult").innerHTML = "Contact has been added";
-			}
-		};
-		xhr.send(jsonPayload);
-	}
-	catch(err)
-	{
-		document.getElementById("contactAddResult").innerHTML = err.message;
-	}
-	
-}
 
 function searchColor()
 {
