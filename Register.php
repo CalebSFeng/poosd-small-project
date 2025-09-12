@@ -5,7 +5,7 @@
     $firstName = $inData["firstName"];
 	$lastName = $inData["lastName"];
 	$login = $inData["login"];
-    $password = $indata["password"];
+    $password = $inData["password"];
 
 	$conn = new mysqli("localhost", "TheBeast", "WeLoveCOP4331", "ContactManager");
 	if ($conn->connect_error) 
@@ -24,7 +24,7 @@
         returnWithError($stmt->error);
     } else {
         // Prepare and bind
-        $stmt = $conn->prepare("INSERT INTO userdata (firstName, lastName, login, password) VALUES (?, ?, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO Users (firstName, lastName, login, password) VALUES (?, ?, ?, ?)");
         $stmt->bind_param("ssss", $firstName, $lastName, $login, $password);
 
         if ($stmt->execute()) {
