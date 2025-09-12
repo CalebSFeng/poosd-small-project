@@ -182,53 +182,132 @@ function addContact() {
 }
 
 
-function searchColor()
-{
-	let srch = document.getElementById("searchText").value;
-	document.getElementById("colorSearchResult").innerHTML = "";
+function searchContact() {
+	let srch = document.getElementById("searchText").value.trim();
+	document.getElementById("contactSearchResult").textContent = "";
+	document.getElementById("contactList").innerHTML = "";
 	
-	let colorList = "";
-
-	let tmp = {search:srch,userId:userId};
-	let jsonPayload = JSON.stringify( tmp );
-
-	let url = urlBase + '/SearchColors.' + extension;
+	const jsonPayload = JSON.stringify({ search: srch, userId: userId });
+	
+	let url = urlBase + '/SearchContact.' + extension;
 	
 	let xhr = new XMLHttpRequest();
 	xhr.open("POST", url, true);
 	xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
-	try
-	{
-		xhr.onreadystatechange = function() 
-		{
-			if (this.readyState == 4 && this.status == 200) 
-			{
-				document.getElementById("colorSearchResult").innerHTML = "Color(s) has been retrieved";
+	try {
+		xhr.onreadystatechange = function() {
+			if (this.readyState == 4 && this.status == 200) {
+				document.getElementById("contactSearchResult").innerHTML = "Contact(s) retrieved";
 				let jsonObject = JSON.parse( xhr.responseText );
+				let contactList = "";
 				
-				for( let i=0; i<jsonObject.results.length; i++ )
-				{
-					colorList += jsonObject.results[i];
-					if( i < jsonObject.results.length - 1 )
-					{
-						colorList += "<br />\r\n";
-					}
-				}
+				if (jsonObject.results && jsonObject.results.length > 0) {
+          			for (let i = 0; i < jsonObject.results.length; i++) {
+            			let contact = jsonObject.results[i];
+
+            			contactList += `
+              			  <div class="contact-item">
+			                <strong>${contact.firstNameContact} ${contact.lastNameContact}</strong><br>
+			                Email: ${contact.email}<br>
+			                Phone: ${contact.phone}<br>
+			                Added: ${contact.date}<br>
+				   			<button onclick="deleteContact('${escapeHtml(contact.firstNameContact)}', '${escapeHtml(contact.lastNameContact)}', '${escapeHtml(contact.email || '')}', '${escapeHtml(contact.phone || '')}')" class="delete-btn" style="background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; margin-top: 5px;">Delete Contact</button>
+		  					<button onclick="UpdateContact('${escapeHtml(contact.firstNameContact)}', '${escapeHtml(contact.lastNameContact)}', '${escapeHtml(contact.email || '')}', '${escapeHtml(contact.phone || '')}')" class="update-btn" style="background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; margin-top: 5px;">Update Contact</button>
+			              </div>
+			              <hr>
+            			`;
+          			}
+        		} else {
+          		  contactList = "No contacts found.";
+        		}
 				
-				document.getElementsByTagName("p")[0].innerHTML = colorList;
+				document.getElementById("contactList").innerHTML = contactList;
 			}
 		};
 		xhr.send(jsonPayload);
 	}
-	catch(err)
-	{
-		document.getElementById("colorSearchResult").innerHTML = err.message;
+	catch(err) {
+		document.getElementById("contactSearchResult").textContent = err.message;
 	}
-	
 }
 
 
+function deleteContact(firstName, lastName, email, phone) {
+ const jsonPayload = JSON.stringify({ 
+    firstNameContact: firstName, 
+    lastNameContact: lastName, 
+    email: email || "", 
+    phone: phone || "", 
+    userId: userId 
+  });
+  const url = urlBase + '/DeleteContact.' + extension;
 
+  let xhr = new XMLHttpRequest();
+  xhr.open("POST", url, true);
+  xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
 
+  try {
+  	xhr.onreadystatechange = function() {
+   		if (this.readyState == 4 && this.status == 200) {
+	 		document.getElementById("contactSearchResult").textContent = "Contact deleted";
+      		searchContact(); // refresh list after deletion
+		} else {
+          document.getElementById("contactSearchResult").textContent = `Error: HTTP ${this.status} - Failed to delete contact`;
+        }
+  	};
+  	xhr.send(jsonPayload);
+  }
+  catch(err) {
+  	document.getElementById("contactSearchResult").textContent = `Error: ${err.message}`;
+  }
+}
 
+function UpdateContact(ogFirstName, ogLastName, ogEmail, ogPhone) {
+  const newFirstName = prompt("Enter new first name:", ogFirstName);
+  if (newFirstName === null) return; // User cancelled
+  
+  const newLastName = prompt("Enter new last name:", ogLastName);
+  if (newLastName === null) return; // User cancelled
+  
+  const newEmail = prompt("Enter new email:", ogEmail || "");
+  if (newEmail === null) return; // User cancelled
+  
+  const newPhone = prompt("Enter new phone:", ogPhone || "");
+  if (newPhone === null) return; // User cancelled
+  
+  const newDate = new Date();
+  
+ const jsonPayload = JSON.stringify({ 
+ 	ogFirstNameContact: ogFirstName, 
+    ogLastNameContact: ogLastName, 
+    ogEmail: ogEmail || "", 
+    ogPhone: ogPhone || "", 
+   
+    firstNameContact: newFirstName.trim(), 
+    lastNameContact: newLastName.trim(), 
+    email: newEmail.trim(), 
+    phone: newPhone.trim(), 
+    userId: userId 
+  });
+  
+  const url = urlBase + '/UpdateContact.' + extension;
 
+  let xhr = new XMLHttpRequest();
+  xhr.open("POST", url, true);
+  xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+
+  try {
+  	xhr.onreadystatechange = function() {
+   		if (this.readyState == 4 && this.status == 200) {
+	 		document.getElementById("contactSearchResult").textContent = "Contact updated";
+      		searchContact(); // refresh list after deletion
+		} else {
+          document.getElementById("contactSearchResult").textContent = `Error: HTTP ${this.status} - Failed to update contact`;
+        }
+  	};
+  	xhr.send(jsonPayload);
+  }
+  catch(err) {
+  	document.getElementById("contactSearchResult").textContent = `Error: ${err.message}`;
+  }
+}
