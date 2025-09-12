@@ -215,6 +215,8 @@ function searchContact()
 			                Email: ${contact.email}<br>
 			                Phone: ${contact.phone}<br>
 			                Added: ${contact.date}<br>
+				   			<button onclick="deleteContact('${escapeHtml(contact.firstNameContact)}', '${escapeHtml(contact.lastNameContact)}', '${escapeHtml(contact.email || '')}', '${escapeHtml(contact.phone || '')}')" class="delete-btn" style="background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; margin-top: 5px;">Delete Contact</button>
+		  					<button onclick="UpdateContact('${escapeHtml(contact.firstNameContact)}', '${escapeHtml(contact.lastNameContact)}', '${escapeHtml(contact.email || '')}', '${escapeHtml(contact.phone || '')}')" class="update-btn" style="background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; margin-top: 5px;">Update Contact</button>
 			              </div>
 			              <hr>
             			;
@@ -236,6 +238,87 @@ function searchContact()
 }
 
 
+function deleteContact(firstName, lastName, email, phone){
+ const jsonPayload = JSON.stringify({ 
+    firstNameContact: firstName, 
+    lastNameContact: lastName, 
+    email: email || "", 
+    phone: phone || "", 
+    userId: userId 
+  });
+  const url = urlBase + '/DeleteContact.' + extension;
+
+  let xhr = new XMLHttpRequest();
+  xhr.open("POST", url, true);
+  xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+
+  try
+  {
+  	xhr.onreadystatechange = function() {
+   		if (this.readyState == 4 && this.status == 200) {
+	 		document.getElementById("contactSearchResult").textContent = "Contact deleted";
+      		searchContact(); // refresh list after deletion
+		}else {
+          document.getElementById("contactSearchResult").textContent = `Error: HTTP ${this.status} - Failed to delete contact`;
+        }
+  	};
+  	xhr.send(jsonPayload);
+  }
+  catch(err){
+  	document.getElementById("contactSearchResult").textContent = `Error: ${err.message}`;
+  }
+}
+
+function UpdateContact(ogFirstName, ogLastName, ogEmail, ogPhone){
+  const newFirstName = prompt("Enter new first name:", originalFirstName);
+  if (newFirstName === null) return; // User cancelled
+  
+  const newLastName = prompt("Enter new last name:", originalLastName);
+  if (newLastName === null) return; // User cancelled
+  
+  const newEmail = prompt("Enter new email:", originalEmail || "");
+  if (newEmail === null) return; // User cancelled
+  
+  const newPhone = prompt("Enter new phone:", originalPhone || "");
+  if (newPhone === null) return; // User cancelled
+  
+  const newDate             = new Date();
+  
+ const jsonPayload = JSON.stringify({ 
+ 	ogFirstNameContact: ogFirstNameContact, 
+    ogLastNameContact: ogLastNameContact, 
+    ogEmail: ogEmail || "", 
+    ogPhone: ogPhone || "", 
+   
+    firstNameContact: newFirstName.trim(), 
+    lastNameContact: newLastName.trim(), 
+    email: newEmail.trim() "", 
+    phone: newPhone.trim() "", 
+    userId: userId 
+  });
+  
+  const url = urlBase + '/UpdateContact.' + extension;
+
+  let xhr = new XMLHttpRequest();
+  xhr.open("POST", url, true);
+  xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+
+  try
+  {
+  	xhr.onreadystatechange = function() {
+   		if (this.readyState == 4 && this.status == 200) {
+	 		document.getElementById("contactSearchResult").textContent = "Contact updated";
+      		searchContact(); // refresh list after deletion
+		}else {
+          document.getElementById("contactSearchResult").textContent = `Error: HTTP ${this.status} - Failed to update contact`;
+        }
+  	};
+  	xhr.send(jsonPayload);
+  }
+  catch(err){
+  	document.getElementById("contactSearchResult").textContent = `Error: ${err.message}`;
+  }
+}
 
 
 
