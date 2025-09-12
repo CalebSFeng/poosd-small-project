@@ -1,30 +1,34 @@
 <?php
 
-	$inData = getRequestInfo();
-	
-    $firstName = $inData["firstName"];
-	$lastName = $inData["lastName"];
-	$login = $inData["login"];
-    $password = $inData["password"];
+$inData = getRequestInfo();
 
-	$conn = new mysqli("localhost", "TheBeast", "WeLoveCOP4331", "ContactManager");
-	if ($conn->connect_error) 
-	{
-		returnWithError( $conn->connect_error );
-	} 
-	else
-	{
-        // Check if user login already exists
-		$checkLoginStmt = $conn->prepare("SELECT login from Users where login = ?");
-		$checkLoginStmt->bind_param("s", $login);
-        $checkLoginStmt->execute();
-        $checkLoginStmt->store_result();
-		
-		if ($checkLoginStmt->num_rows > 0) {
-        returnWithError($stmt->error);
-    } else {
-        // Prepare and bind
-        $stmt = $conn->prepare("INSERT INTO Users (firstName, lastName, login, password) VALUES (?, ?, ?, ?)");
+$firstName = $inData["firstName"];
+$lastName = $inData["lastName"];
+$login = $inData["login"];
+$password = $inData["password"];
+
+$conn = new mysqli("localhost", "TheBeast", "WeLoveCOP4331", "ContactManager");
+
+if ($conn->connect_error) 
+{
+    returnWithError($conn->connect_error);
+} 
+else
+{
+    // Check if user login already exists
+    $checkLoginStmt = $conn->prepare("SELECT Login FROM Users WHERE Login = ?");
+    $checkLoginStmt->bind_param("s", $login);
+    $checkLoginStmt->execute();
+    $checkLoginStmt->store_result();
+    
+    if ($checkLoginStmt->num_rows > 0) 
+    {
+        returnWithError("Login already exists");
+    } 
+    else 
+    {
+        // Prepare and bind insert
+        $stmt = $conn->prepare("INSERT INTO Users (FirstName, LastName, Login, Password) VALUES (?, ?, ?, ?)");
         $stmt->bind_param("ssss", $firstName, $lastName, $login, $password);
 
         if ($stmt->execute()) {
@@ -34,9 +38,11 @@
         }
 
         $stmt->close();
-        $conn->close();
     }
-	}
+
+    $checkLoginStmt->close();
+    $conn->close();
+}
 
 	function getRequestInfo()
 	{
@@ -46,7 +52,7 @@
 	function sendResultInfoAsJson( $obj )
 	{
 		header('Content-type: application/json');
-		echo $obj;
+		echo json_encode(array("success" => $obj));
 	}
 	
 	function returnWithError( $err )

@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-<script src="code.js" defer></script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -54,14 +53,14 @@
 
                 <div class="soft-field">
                     <div class="field-container">
-                        <input type="text" id="loginName" name="username" required autocomplete="username" placeholder="Username">
+                        <input type="text" id="login" name="username" required autocomplete="username" placeholder="Username">
                         <div class="field-accent"></div>
                     </div>
                 </div>
 
                 <div class="soft-field">
                     <div class="field-container">
-                        <input type="password" id="loginPassword" name="password" required autocomplete="current-password" placeholder="Password">
+                        <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="Password">
                         <button type="button" class="gentle-toggle" id="passwordToggle" aria-label="Toggle password visibility">
                             <div class="toggle-icon">
                                 <svg class="eye-open" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -78,21 +77,19 @@
                     <span class="gentle-error" id="passwordError"></span>
                 </div>
 
+<button type="button" class="comfort-button" onclick="doRegister()">
+    <div class="button-background"></div>
+    <span class="button-text">Sign up</span>
+    <div class="button-loader">
+        <div class="gentle-spinner">
+            <div class="spinner-circle"></div>
+        </div>
+    </div>
+    <div class="button-glow"></div>
+</button>
 
 
-
-                <button type="submit" class="comfort-button">
-                    <div class="button-background"></div>
-                    <span class="button-text">Sign up</span>
-                    <div class="button-loader">
-                        <div class="gentle-spinner">
-                            <div class="spinner-circle"></div>
-                        </div>
-                    </div>
-                    <div class="button-glow"></div>
-                </button>
-
-                <div class="comfort-signup">
+		<div class="comfort-signup">
                     <span class="signup-text">Already have an account?</span>
                     <a href="index.html" class="comfort-link signup-link">Sign in</a>
                 </div>
@@ -100,5 +97,6 @@
 
         </div>
     </div>
+    <script src="code.js"></script>
 </body>
 </html>
