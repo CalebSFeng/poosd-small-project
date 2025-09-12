@@ -182,8 +182,7 @@ function addContact() {
 }
 
 
-function searchContact()
-{
+function searchContact() {
 	let srch = document.getElementById("searchText").value.trim();
 	document.getElementById("contactSearchResult").textContent = "";
 	document.getElementById("contactList").innerHTML = "";
@@ -195,12 +194,9 @@ function searchContact()
 	let xhr = new XMLHttpRequest();
 	xhr.open("POST", url, true);
 	xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
-	try
-	{
-		xhr.onreadystatechange = function() 
-		{
-			if (this.readyState == 4 && this.status == 200) 
-			{
+	try {
+		xhr.onreadystatechange = function() {
+			if (this.readyState == 4 && this.status == 200) {
 				document.getElementById("contactSearchResult").innerHTML = "Contact(s) retrieved";
 				let jsonObject = JSON.parse( xhr.responseText );
 				let contactList = "";
@@ -219,7 +215,7 @@ function searchContact()
 		  					<button onclick="UpdateContact('${escapeHtml(contact.firstNameContact)}', '${escapeHtml(contact.lastNameContact)}', '${escapeHtml(contact.email || '')}', '${escapeHtml(contact.phone || '')}')" class="update-btn" style="background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; margin-top: 5px;">Update Contact</button>
 			              </div>
 			              <hr>
-            			;
+            			`;
           			}
         		} else {
           		  contactList = "No contacts found.";
@@ -230,15 +226,13 @@ function searchContact()
 		};
 		xhr.send(jsonPayload);
 	}
-	catch(err)
-	{
+	catch(err) {
 		document.getElementById("contactSearchResult").textContent = err.message;
 	}
-	
 }
 
 
-function deleteContact(firstName, lastName, email, phone){
+function deleteContact(firstName, lastName, email, phone) {
  const jsonPayload = JSON.stringify({ 
     firstNameContact: firstName, 
     lastNameContact: lastName, 
@@ -252,48 +246,47 @@ function deleteContact(firstName, lastName, email, phone){
   xhr.open("POST", url, true);
   xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
 
-  try
-  {
+  try {
   	xhr.onreadystatechange = function() {
    		if (this.readyState == 4 && this.status == 200) {
 	 		document.getElementById("contactSearchResult").textContent = "Contact deleted";
       		searchContact(); // refresh list after deletion
-		}else {
+		} else {
           document.getElementById("contactSearchResult").textContent = `Error: HTTP ${this.status} - Failed to delete contact`;
         }
   	};
   	xhr.send(jsonPayload);
   }
-  catch(err){
+  catch(err) {
   	document.getElementById("contactSearchResult").textContent = `Error: ${err.message}`;
   }
 }
 
-function UpdateContact(ogFirstName, ogLastName, ogEmail, ogPhone){
-  const newFirstName = prompt("Enter new first name:", originalFirstName);
+function UpdateContact(ogFirstName, ogLastName, ogEmail, ogPhone) {
+  const newFirstName = prompt("Enter new first name:", ogFirstName);
   if (newFirstName === null) return; // User cancelled
   
-  const newLastName = prompt("Enter new last name:", originalLastName);
+  const newLastName = prompt("Enter new last name:", ogLastName);
   if (newLastName === null) return; // User cancelled
   
-  const newEmail = prompt("Enter new email:", originalEmail || "");
+  const newEmail = prompt("Enter new email:", ogEmail || "");
   if (newEmail === null) return; // User cancelled
   
-  const newPhone = prompt("Enter new phone:", originalPhone || "");
+  const newPhone = prompt("Enter new phone:", ogPhone || "");
   if (newPhone === null) return; // User cancelled
   
-  const newDate             = new Date();
+  const newDate = new Date();
   
  const jsonPayload = JSON.stringify({ 
- 	ogFirstNameContact: ogFirstNameContact, 
-    ogLastNameContact: ogLastNameContact, 
+ 	ogFirstNameContact: ogFirstName, 
+    ogLastNameContact: ogLastName, 
     ogEmail: ogEmail || "", 
     ogPhone: ogPhone || "", 
    
     firstNameContact: newFirstName.trim(), 
     lastNameContact: newLastName.trim(), 
-    email: newEmail.trim() "", 
-    phone: newPhone.trim() "", 
+    email: newEmail.trim(), 
+    phone: newPhone.trim(), 
     userId: userId 
   });
   
@@ -303,25 +296,18 @@ function UpdateContact(ogFirstName, ogLastName, ogEmail, ogPhone){
   xhr.open("POST", url, true);
   xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
 
-  try
-  {
+  try {
   	xhr.onreadystatechange = function() {
    		if (this.readyState == 4 && this.status == 200) {
 	 		document.getElementById("contactSearchResult").textContent = "Contact updated";
       		searchContact(); // refresh list after deletion
-		}else {
+		} else {
           document.getElementById("contactSearchResult").textContent = `Error: HTTP ${this.status} - Failed to update contact`;
         }
   	};
   	xhr.send(jsonPayload);
   }
-  catch(err){
+  catch(err) {
   	document.getElementById("contactSearchResult").textContent = `Error: ${err.message}`;
   }
 }
-
-
-
-
-
-
