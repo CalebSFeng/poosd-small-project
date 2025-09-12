@@ -184,13 +184,12 @@ function addContact() {
 
 function searchContact()
 {
-	let srch = document.getElementById("searchText").value;
-	document.getElementById("colorSearchResult").innerHTML = "";
+	let srch = document.getElementById("searchText").value.trim();
+	document.getElementById("contactSearchResult").textContent = "";
+	document.getElementById("contactList").innerHTML = "";
 	
-	let contactList = "";
-
-	const jsonPayload = JSON.stringify({ firstNameContact, lastNameContact, email, phone, date, userId });
-
+	const jsonPayload = JSON.stringify({ search: srch, userId: userId });
+	
 	let url = urlBase + '/SearchContact.' + extension;
 	
 	let xhr = new XMLHttpRequest();
@@ -204,13 +203,14 @@ function searchContact()
 			{
 				document.getElementById("contactSearchResult").innerHTML = "Contact(s) retrieved";
 				let jsonObject = JSON.parse( xhr.responseText );
-
+				let contactList = "";
+				
 				if (jsonObject.results && jsonObject.results.length > 0) {
           			for (let i = 0; i < jsonObject.results.length; i++) {
             			let contact = jsonObject.results[i];
 
             			contactList += `
-              				<div class="contact-item">
+              			  <div class="contact-item">
 			                <strong>${contact.firstNameContact} ${contact.lastNameContact}</strong><br>
 			                Email: ${contact.email}<br>
 			                Phone: ${contact.phone}<br>
@@ -223,7 +223,6 @@ function searchContact()
           		  contactList = "No contacts found.";
         		}
 				
-				
 				document.getElementById("contactList").innerHTML = contactList;
 			}
 		};
@@ -231,10 +230,11 @@ function searchContact()
 	}
 	catch(err)
 	{
-		document.getElementById("colorSearchResult").innerHTML = err.message;
+		document.getElementById("contactSearchResult").textContent = err.message;
 	}
 	
 }
+
 
 
 
