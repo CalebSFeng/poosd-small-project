@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>COP 4331 LAMP Stack Demo</title>
+    <script src="code.js" defer></script>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -33,7 +34,7 @@
                     </div>
                 </div>
                 <h1 class="comfort-title">COP 4331 LAMP Stack Demo</h1>
-                <p class="gentle-subtitle">Please Log In</p>
+                <p class="gentle-subtitle">Please Sign Up</p>
             </div>
             
             <form class="comfort-form" id="loginForm" novalidate>
@@ -77,6 +78,7 @@
                     <span class="gentle-error" id="passwordError"></span>
                 </div>
 
+<div id="registerResult" class="gentle-error" aria-live="polite"></div>
 <button type="button" class="comfort-button" onclick="doRegister()">
     <div class="button-background"></div>
     <span class="button-text">Sign up</span>
