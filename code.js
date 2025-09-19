@@ -213,7 +213,7 @@ function initAddContactModal() {
   // Submit -> call API, then close + reset
   form.addEventListener('submit', (e) => {
     e.preventDefault();
-    if (typeof addContact === 'function') addContact();
+    // if (typeof addContact === 'function') addContact();
     closeModal();
     form.reset();
   });
