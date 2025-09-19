@@ -231,6 +231,7 @@ function addContact() {
   const payload = JSON.stringify({
     firstName: firstNameVal,
     lastName : lastNameVal,
+    email,
     phone,
     userId
   });
@@ -277,7 +278,7 @@ function addContact() {
 
 // open modal in Edit mode
 function openEditMode(contact) {
-  document.getElementById('contactId').value      = contact.id || '';
+  // document.getElementById('contactId').value      = contact.id || '';
   document.getElementById('firstNameText').value  = contact.firstName || '';
   document.getElementById('lastNameText').value   = contact.lastName  || '';
   document.getElementById('emailText').value      = contact.email     || '';
@@ -296,7 +297,7 @@ function resetModalTitleToAdd() {
 }
 
 async function updateContactUIOnly() {
-  const id    = document.getElementById('contactId').value;
+  // const id    = document.getElementById('contactId').value;
   const first = document.getElementById('firstNameText').value.trim();
   const last  = document.getElementById('lastNameText').value.trim();
   const email = document.getElementById('emailText').value.trim();
@@ -362,7 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // route modal submit: Update if we have id, else Add
+  /* route modal submit: Update if we have id, else Add
   const form  = document.getElementById('addContactForm');
   const modal = document.getElementById('addContactModal');
   if (form && modal) {
@@ -385,8 +386,10 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('contactId').value = '';
         resetModalTitleToAdd();
       }
+      
     });
   }
+    */
 });
 
 
