@@ -9,12 +9,18 @@
 		returnWithError("User not logged in.");
 		exit;
 	}
+	
+	$userId = $_SESSION["userID"];
 
-	$firstName = $inData["firstName"];
-	$lastName = $inData["lastName"];
-	$email = $inData["email"];
-	$phone = $inData["phone"];
-	$userId = $_SESSION["userId"];
+	$firstName = $inData["firstName"] ?? '';
+	$lastName  = $inData["lastName"] ?? '';
+	$email     = $inData["email"] ?? '';
+	$phone     = $inData["phone"] ?? '';
+
+	if (empty($firstName) || empty($lastName) || empty($email)) {
+		returnWithError("First name, last name, and email are required.");
+		exit;
+	}
 
 	$conn = new mysqli("localhost", "TheBeast", "WeLoveCOP4331", "ContactManager");
 	if ($conn->connect_error) 
