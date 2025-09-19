@@ -12,54 +12,35 @@ let lastName  = '';
 /* ================================
    Auth: Login / Register
 ================================== */
-function doLogin() {
-  userId = 0; firstName = ''; lastName = '';
+function login(event) {
+    event.preventDefault(); // Prevents default form submission
 
-  const loginEl    = document.getElementById('loginName');
-  const passwordEl = document.getElementById('loginPassword');
-  const resultEl   = document.getElementById('loginResult');
+    const username = document.getElementById("loginUsername").value.trim();
+    const password = document.getElementById("loginPassword").value.trim();
+    const resultEl = document.getElementById("loginResult");
 
-  const login    = (loginEl?.value || '').trim();
-  const password = passwordEl?.value || '';
+    resultEl.textContent = ""; // clear previous messages
 
-  if (!login || !password) return showMsg(resultEl, 'Please enter username and password.');
-
-  
-  showMsg(resultEl, '', 'success'); // clear
-  const payload = JSON.stringify({ login, password });
-  const url     = `${urlBase}Login.${extension}`;
-
-  const xhr = new XMLHttpRequest();
-  xhr.open('POST', url, true);
-  xhr.setRequestHeader('Content-type', 'application/json; charset=UTF-8');
-  xhr.timeout = 10000;
-
-  xhr.onreadystatechange = function(){
-    if (this.readyState !== 4) return;
-
-    if (this.status !== 200) {
-      if (this.status === 401) return showMsg(resultEl, 'Incorrect username or password.');
-      if (this.status === 404) return showMsg(resultEl, 'Account not found.');
-      return showMsg(resultEl, `Login failed (HTTP ${this.status}).`);
-    }
-
-    let json = {};
-    try { json = JSON.parse(xhr.responseText || '{}'); } catch {
-      return showMsg(resultEl, 'Invalid server response.');
-    }
-
-    if (json.error)             return showMsg(resultEl, json.error); // backend error text
-    if (!json.id || json.id < 1) return showMsg(resultEl, 'User/Password combination incorrect.');
-
-    userId = json.id; firstName = json.firstName || ''; lastName = json.lastName || '';
-    saveCookie();
-    window.location.href = 'color.html';
-  };
-
-  xhr.onerror   = () => showMsg(resultEl, 'Network error.');
-  xhr.ontimeout = () => showMsg(resultEl, 'Request timed out.');
-  xhr.send(payload);
+    fetch("Login.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ login: username, password: password })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error && data.error.length > 0) {
+            resultEl.textContent = data.error;
+        } else {
+            resultEl.textContent = "Login successful!";
+            // Redirect or load the contacts page
+            window.location.href = "color.html";
+        }
+    })
+    .catch(err => {
+        resultEl.textContent = "Network error";
+    });
 }
+
 
 function doRegister() {
   const resultEl = document.getElementById('registerResult');

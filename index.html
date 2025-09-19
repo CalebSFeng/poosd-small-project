@@ -89,16 +89,23 @@
           <span class="gentle-error" id="loginResult" aria-live="polite"></span>
         </div>
 
-        <button type="submit" class="comfort-button">
-          <div class="button-background"></div>
-          <span class="button-text">Sign in</span>
-          <div class="button-loader">
-            <div class="gentle-spinner">
-              <div class="spinner-circle"></div>
+        <form id="loginForm" onsubmit="login(event)">
+          <input type="text" id="loginUsername" placeholder="Username" required>
+          <input type="password" id="loginPassword" placeholder="Password" required>
+
+          <button type="submit" class="comfort-button">
+            <div class="button-background"></div>
+            <span class="button-text">Sign in</span>
+            <div class="button-loader">
+              <div class="gentle-spinner">
+                <div class="spinner-circle"></div>
+              </div>
             </div>
-          </div>
-          <div class="button-glow"></div>
-        </button>
+            <div class="button-glow"></div>
+          </button>
+
+          <div id="loginResult"></div>
+        </form>
 
         <div class="comfort-signup">
           <span class="signup-text">Don't have an account?</span>
