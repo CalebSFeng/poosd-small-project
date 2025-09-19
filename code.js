@@ -104,6 +104,50 @@ function doRegister() {
   xhr.send(jsonPayload);
 }
 
+function addContact() {
+    // Grab values from input fields
+    let firstName = document.getElementById("firstName").value;
+    let lastName = document.getElementById("lastName").value;
+    let email = document.getElementById("email").value;
+    let phone = document.getElementById("phone").value;
+
+    // ⚠️ For now you’re passing userId — later we’ll switch this to session-based
+    let userId = localStorage.getItem("userId"); // assume you stored this after login
+
+    let tmp = {
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        phone: phone,
+        userId: userId
+    };
+
+    let jsonPayload = JSON.stringify(tmp);
+
+    const url = `${urlBase}AddContact.php`;
+
+    let xhr = new XMLHttpRequest();
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+
+    try {
+        xhr.onreadystatechange = function() {
+            if (this.readyState === 4 && this.status === 200) {
+                let res = JSON.parse(xhr.responseText);
+                if (res.error && res.error.length > 0) {
+                    document.getElementById("contactResult").innerHTML = "Error: " + res.error;
+                } else {
+                    document.getElementById("contactResult").innerHTML = "Contact added successfully!";
+                }
+            }
+        };
+        xhr.send(jsonPayload);
+    } catch (err) {
+        document.getElementById("contactResult").innerHTML = err.message;
+    }
+}
+
+
 /* ================================
    Cookies: save / read / logout
    (Fixed: write 3 separate cookies)

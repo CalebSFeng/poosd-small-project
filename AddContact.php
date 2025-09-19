@@ -3,6 +3,7 @@
 	
 	$firstName = $inData["firstName"];
 	$lastName = $inData["lastName"];
+	$email = $inData["email"];
 	$phone = $inData["phone"];
 	$userId = $inData["userId"];
 
@@ -13,8 +14,8 @@
 	} 
 	else
 	{
-		$stmt = $conn->prepare("INSERT into Contacts (UserId,FirstName, LastName, Phone) VALUES(?,?,?,?,?)");
-		$stmt->bind_param("ss", $userId, $firstName, $lastName, $phone);
+		$stmt = $conn->prepare("INSERT into Contacts (UserId,FirstName, LastName, Email, Phone) VALUES(?,?,?,?,?)");
+		$stmt->bind_param("issss", $userId, $firstName, $lastName, $email, $phone);
 		$stmt->execute();
 		$stmt->close();
 		$conn->close();
@@ -37,5 +38,4 @@
 		$retValue = '{"error":"' . $err . '"}';
 		sendResultInfoAsJson( $retValue );
 	}
-	
 ?>
