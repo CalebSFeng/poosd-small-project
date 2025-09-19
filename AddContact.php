@@ -1,11 +1,20 @@
 <?php
+
+	session_start();
+
 	$inData = getRequestInfo();
 	
+
+	if (!isset($_SESSION['userID'])) {
+		returnWithError("User not logged in.");
+		exit;
+	}
+
 	$firstName = $inData["firstName"];
 	$lastName = $inData["lastName"];
 	$email = $inData["email"];
 	$phone = $inData["phone"];
-	$userId = $inData["userId"];
+	$userId = $_SESSION["userId"];
 
 	$conn = new mysqli("localhost", "TheBeast", "WeLoveCOP4331", "ContactManager");
 	if ($conn->connect_error) 
