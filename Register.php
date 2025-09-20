@@ -1,65 +1,63 @@
 <?php
+header("Access-Control-Allow-Origin: http://poosdgroup1.xyz");
+header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Access-Control-Allow-Credentials: true");
 
-$inData = getRequestInfo();
-
-$firstName = $inData["firstName"];
-$lastName = $inData["lastName"];
-$login = $inData["login"];
-$password = $inData["password"];
-
-$conn = new mysqli("localhost", "TheBeast", "WeLoveCOP4331", "ContactManager");
-
-if ($conn->connect_error) 
-{
-    returnWithError($conn->connect_error);
-} 
-else
-{
-    // Check if user login already exists
-    $checkLoginStmt = $conn->prepare("SELECT Login FROM Users WHERE Login = ?");
-    $checkLoginStmt->bind_param("s", $login);
-    $checkLoginStmt->execute();
-    $checkLoginStmt->store_result();
-    
-    if ($checkLoginStmt->num_rows > 0) 
-    {
-        returnWithError("Login already exists");
-    } 
-    else 
-    {
-        // Prepare and bind insert
-        $stmt = $conn->prepare("INSERT INTO Users (FirstName, LastName, Login, Password) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("ssss", $firstName, $lastName, $login, $password);
-
-        if ($stmt->execute()) {
-            sendResultInfoAsJson("Account Created Successfully");
-        } else {
-            returnWithError($stmt->error); 
-        }
-
-        $stmt->close();
-    }
-
-    $checkLoginStmt->close();
-    $conn->close();
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    http_response_code(200);
+    exit();
 }
 
-	function getRequestInfo()
-	{
-		return json_decode(file_get_contents('php://input'), true);
-	}
+$inData = json_decode(file_get_contents('php://input'), true);
+$firstName = trim($inData['firstName']);
+$lastName  = trim($inData['lastName']);
+$login     = trim($inData['login']);
+$password  = trim($inData['password']); // ideally hashed
 
-	function sendResultInfoAsJson( $obj )
-	{
-		header('Content-type: application/json');
-		echo json_encode(array("success" => $obj));
-	}
-	
-	function returnWithError( $err )
-	{
-		$retValue = '{"error":"' . $err . '"}';
-		sendResultInfoAsJson( $retValue );
-	}
-	
-	
+$conn = new mysqli("localhost", "TheBeast", "WeLoveCOP4331", "ContactManager");
+if ($conn->connect_error) {
+    returnWithError($conn->connect_error);
+    exit();
+}
+
+// Check if username already exists
+$stmt = $conn->prepare("SELECT ID FROM Users WHERE Login=?");
+$stmt->bind_param("s", $login);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result->num_rows > 0) {
+    returnWithError("Username already exists.");
+    $stmt->close();
+    $conn->close();
+    exit();
+}
+$stmt->close();
+
+// Insert new user
+$stmt = $conn->prepare("INSERT INTO Users (FirstName, LastName, Login, Password) VALUES (?, ?, ?, ?)");
+$stmt->bind_param("ssss", $firstName, $lastName, $login, $password);
+if ($stmt->execute()) {
+    returnWithInfo("User registered successfully.");
+} else {
+    returnWithError($stmt->error);
+}
+
+$stmt->close();
+$conn->close();
+
+function sendResultInfoAsJson($obj) {
+    header('Content-type: application/json');
+    echo $obj;
+}
+
+function returnWithError($err) {
+    $retValue = '{"error":"' . $err . '"}';
+    sendResultInfoAsJson($retValue);
+}
+
+function returnWithInfo($msg) {
+    $retValue = '{"error":"","message":"' . $msg . '"}';
+    sendResultInfoAsJson($retValue);
+}
 ?>

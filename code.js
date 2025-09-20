@@ -13,50 +13,70 @@ let lastName  = '';
    Auth: Login / Register
 ================================== */
 function doLogin() {
-  userId = 0; firstName = ''; lastName = '';
-
-  const loginEl    = document.getElementById('loginName');
+  const loginEl = document.getElementById('loginName');
   const passwordEl = document.getElementById('loginPassword');
-  const resultEl   = document.getElementById('loginResult');
+  const resultEl = document.getElementById('loginResult');
 
-  const login    = (loginEl?.value || '').trim();
-  const password = passwordEl?.value || '';
+  const login = (loginEl?.value || '').trim();
+  const password = (passwordEl?.value || '').trim();
 
-  if (!login || !password) return showMsg(resultEl, 'Please enter username and password.');
+  if (!login || !password) {
+    return showMsg(resultEl, 'Please enter username and password.');
+  }
 
-  
-  showMsg(resultEl, '', 'success'); // clear
+  // Clear previous messages
+  showMsg(resultEl, '', 'success');
+
   const payload = JSON.stringify({ login, password });
-  const url     = `${urlBase}Login.${extension}`;
+  const url = `${urlBase}Login.${extension}`;
 
   const xhr = new XMLHttpRequest();
   xhr.open('POST', url, true);
-  xhr.setRequestHeader('Content-type', 'application/json; charset=UTF-8');
+  xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
   xhr.timeout = 10000;
+  xhr.withCredentials = true;
 
-  xhr.onreadystatechange = function(){
+  xhr.onreadystatechange = function () {
     if (this.readyState !== 4) return;
 
     if (this.status !== 200) {
-      if (this.status === 401) return showMsg(resultEl, 'Incorrect username or password.');
-      if (this.status === 404) return showMsg(resultEl, 'Account not found.');
       return showMsg(resultEl, `Login failed (HTTP ${this.status}).`);
     }
 
     let json = {};
-    try { json = JSON.parse(xhr.responseText || '{}'); } catch {
+    try {
+      json = JSON.parse(xhr.responseText || '{}');
+    } catch {
       return showMsg(resultEl, 'Invalid server response.');
     }
 
-    if (json.error)             return showMsg(resultEl, json.error); // backend error text
-    if (!json.id || json.id < 1) return showMsg(resultEl, 'User/Password combination incorrect.');
+    // Show backend error if any
+    if (json.error && json.error.length > 0) {
+      return showMsg(resultEl, json.error);
+    }
 
-    userId = json.id; firstName = json.firstName || ''; lastName = json.lastName || '';
+    // Invalid login check
+    if (!json.id || json.id < 1) {
+      return showMsg(resultEl, 'User/Password combination incorrect.');
+    }
+
+    // Successful login: store session info
+    const userId = json.id;
+    const firstName = json.firstName || '';
+    const lastName = json.lastName || '';
+
+    sessionStorage.setItem('userId', userId);
+    sessionStorage.setItem('firstName', firstName);
+    sessionStorage.setItem('lastName', lastName);
+
+    // Optional: save cookie if your app uses it
     saveCookie();
+
+    // Redirect to contacts page
     window.location.href = 'color.html';
   };
 
-  xhr.onerror   = () => showMsg(resultEl, 'Network error.');
+  xhr.onerror = () => showMsg(resultEl, 'Network error.');
   xhr.ontimeout = () => showMsg(resultEl, 'Request timed out.');
   xhr.send(payload);
 }
@@ -101,6 +121,7 @@ function doRegister() {
   };
 
   xhr.onerror = () => showMsg(resultEl, 'Network error.');
+  xhr.withCredentials = true;
   xhr.send(jsonPayload);
 }
 
@@ -124,27 +145,15 @@ function saveCookie() {
   document.cookie = `lastName=${encodeURIComponent(lastName)}; expires=${expires}; path=/`;
 }
 
-function readCookie() {
-  userId = -1; firstName = ''; lastName = '';
+function readSession() {
+  userId = parseInt(sessionStorage.getItem('userId'), 10) || -1;
+  firstName = sessionStorage.getItem('firstName') || '';
+  lastName  = sessionStorage.getItem('lastName') || '';
 
-  const jar = Object.fromEntries(
-    document.cookie.split(';').map(c => {
-      const [k, ...rest] = c.trim().split('=');
-      return [k, rest.join('=')];
-    })
-  );
-
-  if (jar.userId)    userId    = parseInt(jar.userId, 10);
-  if (jar.firstName) firstName = decodeURIComponent(jar.firstName);
-  if (jar.lastName)  lastName  = decodeURIComponent(jar.lastName);
-
-  // Gate: if not logged in, go back to sign-in
   if (!userId || userId < 1) {
     window.location.href = 'index.html';
   }
 }
-
-
 
 function doLogout() {
   userId = 0; firstName = ''; lastName = '';
@@ -172,27 +181,32 @@ function setupPasswordToggle() {
     }
   });
 }
+function openModal() {
+  const modal = document.getElementById('addContactModal');
+  if (!modal) return;
+  modal.classList.remove('is-hidden');
+  document.body.classList.add('modal-open');
+  modal.querySelector('input')?.focus();
+}
+
+function closeModal() {
+  const modal = document.getElementById('addContactModal');
+  const openBtn = document.getElementById('openAdd');
+  if (!modal) return;
+  modal.classList.add('is-hidden');
+  document.body.classList.remove('modal-open');
+  openBtn?.focus();
+}
 
 /* ================================
    Modal: Add Contact (open/close)
 ================================== */
 function initAddContactModal() {
-  const openBtn = document.getElementById('openAdd');          // FAB +
-  const modal   = document.getElementById('addContactModal');  // modal container
-  const form    = document.getElementById('addContactForm');   // form inside
+  const openBtn = document.getElementById('openAdd');          
+  const modal   = document.getElementById('addContactModal');  
+  const form    = document.getElementById('addContactForm');   
 
-  if (!openBtn || !modal || !form) return; // not this page
-
-  function openModal() {
-    modal.classList.remove('is-hidden');
-    document.body.classList.add('modal-open');
-    modal.querySelector('input')?.focus();
-  }
-  function closeModal() {
-    modal.classList.add('is-hidden');
-    document.body.classList.remove('modal-open');
-    openBtn?.focus();
-  }
+  if (!openBtn || !modal || !form) return;
 
   // Open on + click
   openBtn.addEventListener('click', (e) => {
@@ -210,19 +224,29 @@ function initAddContactModal() {
     if (e.key === 'Escape' && !modal.classList.contains('is-hidden')) closeModal();
   });
 
-  // Submit -> call API, then close + reset
-  form.addEventListener('submit', (e) => {
+  // Submit -> add or update contact
+  form.addEventListener("submit", (e) => {
     e.preventDefault();
-    if (typeof addContact === 'function') addContact();
-    closeModal();
-    form.reset();
+    const id = document.getElementById("contactId")?.value;
+    if (id) {
+      updateContact().then(() => {
+        closeModal();
+        form.reset();
+      });
+    } else {
+      addContact().then(() => {
+        closeModal();
+        form.reset();
+      });
+    }
   });
 }
 
-function addContact() {
+
+async function addContact() {
   const firstNameVal = document.getElementById("firstNameText")?.value.trim() || '';
   const lastNameVal  = document.getElementById("lastNameText")?.value.trim()  || '';
-  const email        = document.getElementById("emailText")?.value.trim()     || ''; // UI only
+  const email        = document.getElementById("emailText")?.value.trim()     || '';
   const phone        = document.getElementById("phoneText")?.value.trim()     || '';
   const resultEl     = document.getElementById("contactAddResult");
 
@@ -232,11 +256,17 @@ function addContact() {
     firstName: firstNameVal,
     lastName : lastNameVal,
     email,
-    phone,
-    userId
+    phone
   });
 
   const url = `${urlBase}AddContact.${extension}`;
+  fetch('http://poosdgroup1.xyz/AddContact.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    credentials: 'include'
+  });
+
   const xhr = new XMLHttpRequest();
   xhr.open("POST", url, true);
   xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
@@ -244,20 +274,26 @@ function addContact() {
     if (this.readyState !== 4) return;
 
     if (this.status === 200) {
+      let data = {};
+      try { data = JSON.parse(xhr.responseText || '{}'); } catch {}
+
+      if (data.error) {
+        if (resultEl) resultEl.textContent = data.error;
+        return;
+      }
+
       if (resultEl) resultEl.textContent = "Contact has been added";
 
-      // Append to table immediately (uses email from UI field)
-      const tbody = document.getElementById('contactsBody') || document.querySelector('.tbl-content tbody');
+      // Append new row to table
+      const tbody = document.getElementById('contactsBody');
       if (tbody) {
-        let data = {};
-        try { data = JSON.parse(xhr.responseText || '{}'); } catch {}
         const tr = document.createElement('tr');
-        tr.dataset.id = data.id ?? `tmp-${Date.now()}`;
+        tr.dataset.id = data.id;
         tr.innerHTML = `
-          <td>${firstNameVal}</td>
-          <td>${lastNameVal}</td>
-          <td>${email}</td>
-          <td>${phone}</td>
+          <td>${data.firstName}</td>
+          <td>${data.lastName}</td>
+          <td>${data.email}</td>
+          <td>${data.phone}</td>
           <td>
             <div class="action-buttons">
               <button class="edit">Edit</button>
@@ -266,13 +302,21 @@ function addContact() {
           </td>`;
         tbody.appendChild(tr);
       }
+
+      // Optionally clear inputs
+      document.getElementById("firstNameText").value = "";
+      document.getElementById("lastNameText").value = "";
+      document.getElementById("emailText").value = "";
+      document.getElementById("phoneText").value = "";
     } else {
       if (resultEl) resultEl.textContent = `HTTP ${this.status}`;
     }
   };
   xhr.onerror = () => { if (resultEl) resultEl.textContent = "Network error"; };
+  xhr.withCredentials = true;
   xhr.send(payload);
 }
+
 
 
 
@@ -296,32 +340,101 @@ function resetModalTitleToAdd() {
   if (title) title.textContent = 'Add Contact';
 }
 
-async function updateContactUIOnly() {
-  // const id    = document.getElementById('contactId').value;
-  const first = document.getElementById('firstNameText').value.trim();
-  const last  = document.getElementById('lastNameText').value.trim();
-  const email = document.getElementById('emailText').value.trim();
-  const phone = document.getElementById('phoneText').value.trim();
-  const tbody = document.getElementById('contactsBody') || document.querySelector('.tbl-content tbody');
-  const tr = tbody?.querySelector(`tr[data-id="${id}"]`);
-  if (tr) {
-    tr.children[0].textContent = first;
-    tr.children[1].textContent = last;
-    tr.children[2].textContent = email;
-    tr.children[3].textContent = phone;
-  }
+function updateContact() {
+    const id        = document.getElementById("contactId").value;
+    const firstName = document.getElementById("firstNameText").value.trim();
+    const lastName  = document.getElementById("lastNameText").value.trim();
+    const email     = document.getElementById("emailText").value.trim();
+    const phone     = document.getElementById("phoneText").value.trim();
+
+    const payload = { id, firstName, lastName, email, phone };
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "UpdateContact.php", true);
+    xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+    xhr.withCredentials = true;
+    xhr.onload = () => {
+        if (xhr.status === 200) {
+            const res = JSON.parse(xhr.responseText);
+            if (res.success) {
+                // Update table row
+                const row = document.querySelector(`tr[data-id="${id}"]`);
+                if (row) {
+                    row.children[0].textContent = firstName;
+                    row.children[1].textContent = lastName;
+                    row.children[2].textContent = email;
+                    row.children[3].textContent = phone;
+                }
+                closeModal();
+            } else {
+                alert("Error: " + res.error);
+            }
+        } else {
+            alert("HTTP error: " + xhr.status);
+        }
+    };
+    xhr.send(JSON.stringify(payload));
 }
 
-async function deleteContactUIOnly(tr) {
-  const parent = tr.parentNode;
-  const next = tr.nextSibling;
-  tr.remove();
-}
 
+// Run on color.html only
+document.addEventListener("DOMContentLoaded", () => {
+    const tbody = document.getElementById("contactsBody");
+    if (!tbody) return; // stop if this page doesn't have the table
+
+    // Event delegation for delete buttons
+    tbody.addEventListener("click", (e) => {
+        if (e.target.classList.contains("delete")) {
+            const row = e.target.closest("tr");
+            const contactId = row.dataset.id;
+
+            if (!contactId) return;
+            if (!confirm("Are you sure you want to delete this contact?")) return;
+
+            const xhr = new XMLHttpRequest();
+            xhr.open("POST", "DeleteContact.php", true);
+            xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
+            xhr.withCredentials = true;
+            xhr.onload = () => {
+                if (xhr.status === 200) {
+                    const res = JSON.parse(xhr.responseText);
+                    if (res.success) row.remove();
+                    else alert("Error: " + res.error);
+                } else {
+                    alert("HTTP error: " + xhr.status);
+                }
+            };
+            xhr.send(JSON.stringify({ contactId }));
+        }
+      if (e.target.classList.contains("edit")) {
+        const row = e.target.closest("tr");
+        const contactId = row.dataset.id;
+
+        // Fill modal fields
+        document.getElementById("contactId").value = contactId;
+        document.getElementById("firstNameText").value = row.children[0].textContent;
+        document.getElementById("lastNameText").value  = row.children[1].textContent;
+        document.getElementById("emailText").value     = row.children[2].textContent;
+        document.getElementById("phoneText").value     = row.children[3].textContent;
+
+        openModal(); // your function to show modal
+      }
+
+      document.getElementById("addContactForm")?.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const id = document.getElementById("contactId").value;
+      if (id) updateContact();
+      else addContact();
+
+      document.getElementById("addContactForm").reset();
+      closeModal();
+    });
+});
+});
 
 document.addEventListener('DOMContentLoaded', () => {
   // password eye on login page
-  setupPasswordToggle?.();
+  setupPasswordToggle();
 
   // login form submit
   const loginForm = document.getElementById('loginForm');
@@ -338,39 +451,14 @@ document.addEventListener('DOMContentLoaded', () => {
     logoutBtn.addEventListener('click', (e) => { e.preventDefault(); doLogout(); });
   }
 
-  // table Edit/Delete
-  const tbody = document.getElementById('contactsBody') || document.querySelector('.tbl-content tbody');
-  if (tbody) {
-    tbody.addEventListener('click', (e) => {
-      const editBtn = e.target.closest('button.edit');
-      if (editBtn) {
-        const tr = editBtn.closest('tr');
-        const contact = {
-          id: tr?.dataset.id || '',
-          firstName: tr?.children[0]?.textContent?.trim() || '',
-          lastName : tr?.children[1]?.textContent?.trim() || '',
-          email    : tr?.children[2]?.textContent?.trim() || '',
-          phone    : tr?.children[3]?.textContent?.trim() || '',
-        };
-        openEditMode(contact);
-        return;
-      }
-      const delBtn = e.target.closest('button.delete');
-      if (delBtn) {
-        const tr = delBtn.closest('tr');
-        if (confirm('Delete this contact?')) deleteContactUIOnly(tr);
-      }
-    });
-  }
-
-  /* route modal submit: Update if we have id, else Add
+  // route modal submit: Update if we have id, else Add
   const form  = document.getElementById('addContactForm');
   const modal = document.getElementById('addContactModal');
   if (form && modal) {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const id = document.getElementById('contactId')?.value;
-      if (id) await updateContactUIOnly();
+      if (id) await updateContact();
       else    addContact();
 
       modal.classList.add('is-hidden');
@@ -389,54 +477,86 @@ document.addEventListener('DOMContentLoaded', () => {
       
     });
   }
-    */
+
+});
+
+async function loadContacts() {
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", "GetContacts.php", true);
+    xhr.withCredentials = true; // important for session
+    xhr.onload = () => {
+        if (xhr.status === 200) {
+            const data = JSON.parse(xhr.responseText);
+            const tbody = document.getElementById("contactsBody");
+            if (!tbody) return;
+            tbody.innerHTML = ""; // clear table
+            data.forEach(contact => {
+                const tr = document.createElement("tr");
+                tr.dataset.id = contact.ID;
+                tr.innerHTML = `
+                    <td>${contact.FirstName}</td>
+                    <td>${contact.LastName}</td>
+                    <td>${contact.Email}</td>
+                    <td>${contact.Phone}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="edit">Edit</button>
+                            <button class="delete">Delete</button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } else {
+            console.error("Failed to load contacts:", xhr.status);
+        }
+    };
+    xhr.send();
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+    loadContacts();
 });
 
 
 /* ================================
    Search (IDs fixed to searchText)
 ================================== */
-function searchColor() {
-  const input = document.getElementById("searchText");
-  const srch  = (input?.value || "").trim();
+function searchContacts() {
+  const searchInput = document.getElementById("searchText");
 
-  const resultEl = document.getElementById("colorSearchResult");
-  if (resultEl) resultEl.textContent = "";
+  if (searchInput) {
+      searchInput.addEventListener("input", () => {
+          const filter = searchInput.value.toLowerCase();
+          const tbody = document.getElementById("contactsBody");
+          if (!tbody) return;
 
-  const payload = JSON.stringify({ search: srch, userId });
-  const url     = `${urlBase}SearchColors.${extension}`;
+          Array.from(tbody.rows).forEach(row => {
+              const firstName = row.cells[0].textContent.toLowerCase();
+              const lastName  = row.cells[1].textContent.toLowerCase();
+              const email     = row.cells[2].textContent.toLowerCase();
+              const phone     = row.cells[3].textContent.toLowerCase();
 
-  const xhr = new XMLHttpRequest();
-  xhr.open("POST", url, true);
-  xhr.setRequestHeader("Content-type", "application/json; charset=UTF-8");
-  xhr.onreadystatechange = function () {
-    if (this.readyState !== 4) return;
+              if (
+                  firstName.includes(filter) ||
+                  lastName.includes(filter) ||
+                  email.includes(filter) ||
+                  phone.includes(filter)
+              ) {
+                  row.style.display = ""; // show
+              } else {
+                  row.style.display = "none"; // hide
+              }
+          });
+      });
+  }
 
-    if (this.status !== 200) {
-      if (resultEl) resultEl.textContent = `HTTP ${this.status}`;
-      return;
-    }
-
-    if (resultEl) resultEl.textContent = "Color(s) has been retrieved";
-
-    let json = {};
-    try { json = JSON.parse(xhr.responseText || '{}'); } catch {}
-
-    const out = document.getElementById("searchOutput");
-    if (out) {
-      out.style.display = 'block';
-      out.innerHTML = (json.results || []).join("<br>");
-    }
-  };
-  xhr.send(payload);
 }
 
 /* ================================
    Page wiring after DOM is ready
 ================================== */
 document.addEventListener('DOMContentLoaded', () => {
-  // Login page wiring
-  setupPasswordToggle();
   const loginForm = document.getElementById('loginForm');
   if (loginForm) {
     loginForm.addEventListener('submit', (e) => {

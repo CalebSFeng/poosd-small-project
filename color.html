@@ -11,10 +11,16 @@
 </head>
 
 <!-- Back to index.html if no cookie -->
-<body onload="readCookie()">
+<body onload="readSession()">
 <section>
-  <h1>Welcome Boss</h1>
-
+  <h1 id="welcomeMessage">Welcome!</h1>
+  <script>
+    window.addEventListener("DOMContentLoaded", () => {
+      const welcomeEl = document.getElementById("welcomeMessage");
+      const firstName = sessionStorage.getItem('firstName') || '';
+      if (welcomeEl) welcomeEl.textContent = `Welcome, ${firstName}!`;
+    });
+  </script>
   <!-- soft background -->
   <div class="soft-background">
     <div class="floating-shapes">
@@ -43,12 +49,20 @@
         <div class="gentle-glow"></div>
       </div>
     </div>
-    <span class="user-name">Manager Name</span>
+    <span class="user-name" id="fullName"></span>
+    <script>
+      window.addEventListener("DOMContentLoaded", () => {
+        const welcomeEl1 = document.getElementById("fullName");
+        const firstName1 = sessionStorage.getItem('firstName') || '';
+        const lastName1 = sessionStorage.getItem('lastName') || '';
+        if (welcomeEl1) welcomeEl1.textContent = `${firstName1} ${lastName1}`;
+      });
+    </script>
   </div>
 
-  <!-- Search (IDs match searchColor in code.js) -->
-  <input class="search-bar" type="text" id="searchText" placeholder="Search Contact" oninput="searchColor()">
-  <div id="colorSearchResult" aria-live="polite"></div>
+  <!-- Search (IDs match searchContacts in code.js) -->
+  <input class="search-bar" type="text" id="searchText" placeholder="Search Contact" oninput="searchContacts()">
+  <div id="contactSearchResult" aria-live="polite"></div>
   <p id="searchOutput" style="display:none"></p>
 
   <!-- Top-right actions -->
@@ -112,6 +126,7 @@
       <h3 id="addTitle">Add Contact</h3>
 
       <form id="addContactForm">
+        <input type="hidden" id="contactId" name="contactId" />
         <div class="form-row">
           <label>First name
             <input id="firstNameText" required />
@@ -131,7 +146,7 @@
 
         <div class="modal__actions">
           <button type="button" class="btn btn-outline" data-close>Cancel</button>
-          <button type="submit" class="btn btn-primary" id="saveContactBtn" onclick="addContact()">Save</button>
+          <button type="submit" class="btn btn-primary" id="saveContactBtn">Save</button>
         </div>
 
         <!-- status line used by addContact() -->
