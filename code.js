@@ -167,7 +167,10 @@ function doLogout() {
    Password eye toggle (login page)
 ================================== */
 function setupPasswordToggle() {
-  const loginPassword = document.getElementById('loginPassword');
+  let loginPassword = document.getElementById('loginPassword');
+  if (!loginPassword) {
+    loginPassword = document.getElementById('password');
+  }
   const passwordToggle = document.getElementById('passwordToggle');
   if (!loginPassword || !passwordToggle) return;
 
