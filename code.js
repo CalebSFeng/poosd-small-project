@@ -523,10 +523,10 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 /* ================================
-   Search (IDs fixed to searchText)
+   Search (IDs fixed to search)
 ================================== */
 function searchContacts() {
-  const searchInput = document.getElementById("searchText");
+  const searchInput = document.getElementById("search");
 
   if (searchInput) {
       searchInput.addEventListener("input", () => {
