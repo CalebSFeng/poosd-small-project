@@ -1,6 +1,6 @@
 <?php
 // CORS headers (allow credentials)
-header("Access-Control-Allow-Origin: http://poosdgroup1.xyz");
+header("Access-Control-Allow-Origin: http://www.poosdgroup1.xyz");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Credentials: true");
