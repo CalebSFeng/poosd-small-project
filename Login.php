@@ -11,6 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     exit();
 }
 
+ini_set('session.cookie_domain', '.poosdgroup1.xyz'); 
 session_start();
 
 $inData = getRequestInfo();
